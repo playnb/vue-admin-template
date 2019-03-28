@@ -1,23 +1,27 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-      <h3 class="title">vue-admin-template</h3>
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" label-position="left">
+      <h3 class="title">征途社区管理后台</h3>
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
-        <el-input v-model="loginForm.username" name="username" type="text" auto-complete="on" placeholder="username" />
+        <el-input
+          v-model="loginForm.username"
+          name="username"
+          type="text"
+          auto-complete="on"
+          placeholder="用户名" />
       </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
         </span>
         <el-input
-          :type="pwdType"
           v-model="loginForm.password"
+          :type="pwdType"
           name="password"
-          auto-complete="on"
-          placeholder="password"
+          placeholder="密码"
           @keyup.enter.native="handleLogin" />
         <span class="show-pwd" @click="showPwd">
           <svg-icon :icon-class="pwdType === 'password' ? 'eye' : 'eye-open'" />
@@ -32,25 +36,36 @@
         <span style="margin-right:20px;">username: admin</span>
         <span> password: admin</span>
       </div>
+      <hr>
+      <div class="tips">
+        <h3>一些资源</h3>
+        <p><a href="https://juejin.im/post/59097cd7a22b9d0065fb61d2">模板教程链接</a></p>
+        <p><a href="https://panjiachen.gitee.io/vue-element-admin-site/zh/">模板原始项目地址</a></p>
+        <p><a href="http://element-cn.eleme.io/#/zh-CN/component/installation">Element-UI</a></p>
+        <p><a href="https://www.tangshuang.net/3512.html">vue.js中文教程</a></p>
+        <p><a href="https://cn.vuejs.org/v2/api/#v-bind">vue.js[CN]</a></p>
+      </div>
     </el-form>
   </div>
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
+import CheckValid from '@/utils/validate'
 
 export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('请输入正确的用户名'))
+      console.debug('call validateUsername')
+      if (!CheckValid.isvalidUsername(value)) {
+        callback(new Error('用户名不合法'))
       } else {
         callback()
       }
     }
-    const validatePass = (rule, value, callback) => {
-      if (value.length < 5) {
+    const validatePassword = (rule, value, callback) => {
+      console.debug('call validatePassword')
+      if (!CheckValid.isvalidPassword(value)) {
         callback(new Error('密码不能小于5位'))
       } else {
         callback()
@@ -63,7 +78,7 @@ export default {
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePass }]
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       loading: false,
       pwdType: 'password',
@@ -79,6 +94,7 @@ export default {
     }
   },
   methods: {
+    // 切换密码是否显示
     showPwd() {
       if (this.pwdType === 'password') {
         this.pwdType = ''
@@ -87,6 +103,16 @@ export default {
       }
     },
     handleLogin() {
+      console.debug(this.loginForm)
+      console.debug(this.$refs.loginForm)
+      this.$refs.loginForm.validate().then(() => {
+        // 这里就可以做处理了，请求登录
+        console.debug('这里就可以做处理了，请求登录' + this.loginForm.username + ':' + this.loginForm.password)
+      }).catch(() => {
+        console.debug('loginForm validate failed')
+      })
+      return
+      // eslint-disable-next-line
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
