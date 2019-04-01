@@ -105,28 +105,23 @@ export default {
     handleLogin() {
       console.debug(this.loginForm)
       console.debug(this.$refs.loginForm)
+      this.loading = true
       this.$refs.loginForm.validate().then(() => {
         // 这里就可以做处理了，请求登录
         console.debug('这里就可以做处理了，请求登录' + this.loginForm.username + ':' + this.loginForm.password)
+        this.$store.dispatch('Login', this.loginForm).then(() => {
+          console.debug('登录成功,自动跳转')
+          this.loading = false
+          this.$router.push({ path: this.redirect || '/' })
+        }).catch(() => {
+          console.debug('登录失败')
+          this.loading = false
+        })
       }).catch(() => {
         console.debug('loginForm validate failed')
+        this.loading = false
       })
       return
-      // eslint-disable-next-line
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('Login', this.loginForm).then(() => {
-            this.loading = false
-            this.$router.push({ path: this.redirect || '/' })
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
     }
   }
 }

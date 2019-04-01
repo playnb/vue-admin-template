@@ -1,5 +1,7 @@
-import { login, logout, getInfo } from '@/api/login'
+import { logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+
+import api from '@/api'
 
 const user = {
   state: {
@@ -29,8 +31,11 @@ const user = {
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
-        login(username, userInfo.password).then(response => {
+        console.debug('actions:Login')
+        console.debug(userInfo)
+        api.user.login(username, userInfo.password).then(response => {
           const data = response.data
+          console.log(response)
           setToken(data.token)
           commit('SET_TOKEN', data.token)
           resolve()

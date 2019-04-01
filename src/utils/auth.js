@@ -1,15 +1,23 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'vue_admin_template_token'
+const TokenKey = 'ztcommunity_admin_token'
+const AccidKey = 'ztcommunity_admin_accid'
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  const token = Cookies.get(TokenKey)
+  const accid = Cookies.get(AccidKey)
+  if (token && accid) {
+    return { 'token': token, 'accid': accid }
+  }
+  return undefined
 }
 
-export function setToken(token) {
-  return Cookies.set(TokenKey, token)
+export function setToken(accid, token) {
+  Cookies.set(TokenKey, token)
+  Cookies.set(AccidKey, accid)
 }
 
 export function removeToken() {
-  return Cookies.remove(TokenKey)
+  Cookies.remove(TokenKey)
+  Cookies.remove(AccidKey)
 }
