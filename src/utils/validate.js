@@ -4,7 +4,7 @@
 
 export default {
   isvalidUsername: function(str) {
-    const valid_map = ['admin', 'editor']
+    const valid_map = ['admin', 'editor', 'ltp']
     return valid_map.indexOf(str.trim()) >= 0
   },
   isvalidPassword: function(str) {

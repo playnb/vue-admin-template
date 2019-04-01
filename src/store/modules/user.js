@@ -1,29 +1,28 @@
-import { logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-
+import { logout } from '@/api/user'
+import auth from '@/utils/auth'
 import api from '@/api'
 
 const user = {
   state: {
-    token: getToken(),
-    name: '',
-    avatar: '',
-    roles: []
+    token: auth.getToken(),
+    userInfo: {}
   },
 
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
     },
-    SET_NAME: (state, name) => {
-      state.name = name
-    },
-    SET_AVATAR: (state, avatar) => {
-      state.avatar = avatar
-    },
-    SET_ROLES: (state, roles) => {
-      state.roles = roles
+    SET_USER_INFO: (state, userInfo) => {
+      state.userInfo = userInfo
     }
+  },
+
+  getters: {
+    accid: state => state.userInfo.accid,
+    token: state => state.token + 'XXXXXXX',
+    avatar: state => state.userInfo.avatar,
+    name: state => state.userInfo.name,
+    roles: state => '管理员'
   },
 
   actions: {
@@ -33,12 +32,20 @@ const user = {
       return new Promise((resolve, reject) => {
         console.debug('actions:Login')
         console.debug(userInfo)
-        api.user.login(username, userInfo.password).then(response => {
-          const data = response.data
-          console.log(response)
-          setToken(data.token)
-          commit('SET_TOKEN', data.token)
-          resolve()
+        api.user.login(username, userInfo.password).then(data => {
+          console.debug(data.data.ok)
+          if (data.data.ok === true) {
+            console.debug('登录成功')
+            console.debug(data.data.user_info)
+
+            auth.setToken(data.data.user_info.accid, data.data.token)
+            this.commit('SET_TOKEN', data.data.token)
+            this.commit('SET_USER_INFO', data.data.user_info)
+            resolve()
+          } else {
+            console.debug('登录失败')
+            reject('Login Failed')
+          }
         }).catch(error => {
           reject(error)
         })
@@ -48,17 +55,14 @@ const user = {
     // 获取用户信息
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
-        getInfo(state.token).then(response => {
-          const data = response.data
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
+        console.debug('获取用户信息')
+        api.user.getInfo(state.token).then(data => {
+          if (data.data.user.accid && data.data.user.accid.toString() === auth.getAccid()) {
+            this.commit('SET_USER_INFO', data.data.user)
           }
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          resolve(response)
+          resolve(data.data.user)
         }).catch(error => {
+          console.debug(error)
           reject(error)
         })
       })
@@ -68,9 +72,9 @@ const user = {
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
         logout(state.token).then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          removeToken()
+          this.commit('SET_TOKEN', '')
+          this.commit('SET_USER_INFO', null)
+          auth.removeToken()
           resolve()
         }).catch(error => {
           reject(error)
@@ -82,7 +86,7 @@ const user = {
     FedLogOut({ commit }) {
       return new Promise(resolve => {
         commit('SET_TOKEN', '')
-        removeToken()
+        auth.removeToken()
         resolve()
       })
     }

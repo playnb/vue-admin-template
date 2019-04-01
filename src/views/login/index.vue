@@ -73,8 +73,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: 'admin'
+        username: 'ltp',
+        password: '123456'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -110,8 +110,12 @@ export default {
         // 这里就可以做处理了，请求登录
         console.debug('这里就可以做处理了，请求登录' + this.loginForm.username + ':' + this.loginForm.password)
         this.$store.dispatch('Login', this.loginForm).then(() => {
-          console.debug('登录成功,自动跳转')
           this.loading = false
+
+          console.debug(this.$store.getters)
+
+          console.debug('登录成功,自动跳转')
+          console.debug({ path: this.redirect || '/' })
           this.$router.push({ path: this.redirect || '/' })
         }).catch(() => {
           console.debug('登录失败')

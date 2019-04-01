@@ -1,6 +1,6 @@
 import axios from 'axios'
 import store from '../store'
-import { getToken } from '@/utils/auth'
+import auth from '@/utils/auth'
 
 // 创建axios实例
 const instance = axios.create({
@@ -12,10 +12,10 @@ const instance = axios.create({
 instance.interceptors.request.use(
   config => {
     if (store.getters.token) {
-      console.debug('填充Token信息')
+      // console.debug('填充Token信息')
       config.headers['platform'] = 'web'
       config.headers['version'] = '1.0.0'
-      const token = getToken()
+      const token = auth.getToken()
       if (token) {
         config.headers['accid'] = token.accid
         config.headers['token'] = token.token
@@ -32,7 +32,12 @@ instance.interceptors.request.use(
 
 // response拦截器
 instance.interceptors.response.use(function(response) {
-  console.debug(response)
+  if (response.status === 200) {
+    console.debug(response)
+  } else if (response.status === 401) {
+    console.debug('没有权限')
+    console.debug(response)
+  }
   return response.data
 }, function(error) {
   // 对响应错误做点什么

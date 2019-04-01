@@ -10,5 +10,12 @@ export default {
         'password': password
       }
     })
+  },
+
+  getInfo: function(accid) {
+    return req({
+      method: 'get',
+      url: 'users/' + accid
+    })
   }
 }
